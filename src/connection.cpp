@@ -53,7 +53,7 @@ Connection::Connection(string target, int port) : targetStr(target), targetPort(
             fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFL, NULL) | O_NONBLOCK);
         
             // connecting to node
-            if (connect(sockfd, targetSockaddr, sizeof(*targetSockaddr)) == -1) {
+            if (connect(sockfd, targetSockaddr, aip->ai_addrlen) == -1) {
                 if (errno != EINPROGRESS) {
                     Utils::exitError("Error connecting to node " + target + ":" + to_string(port) + " - " + strerror(errno));
                 } else {
