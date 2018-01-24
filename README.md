@@ -25,7 +25,6 @@ $ sudo make install
 
 Run without arguments for help:
 
-
 ```
 $ izubitcoin
 
@@ -63,7 +62,6 @@ Bitcoin node version: /Bitcoin ABC:0.16.1(EB8.0)/
 ### Contributing
 
 https://github.com/segoverflow/izubitcoin
-
 
 ### Authors
 
