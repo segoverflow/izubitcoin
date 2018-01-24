@@ -4,7 +4,7 @@ izubitcoin is a simple tool for interact with bitcoin nodes at protocol level.
 
 ### Prerequisites
 
-Computer running GNU Linux.
+Computer running GNU Linux (with dev tools installed).
 
 ### Installing
 
@@ -67,7 +67,7 @@ https://github.com/segoverflow/izubitcoin
 
 ### Authors
 
-* **reizu** - [seguridadoverflow.com](http://seguridadoverlow.com)
+* **reizu** - http://seguridadoverflow.com
 
 ### License
 
