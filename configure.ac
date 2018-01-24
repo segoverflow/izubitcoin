@@ -14,6 +14,7 @@ AC_DEFINE([USER_AGENT], ["/izubitcoin/"], [User agent sent])
 AM_INIT_AUTOMAKE([foreign])
 
 AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX([11], [ext], [mandatory])
 
 AC_CHECK_LIB([ssl], [main], [], [AC_MSG_ERROR([libssl missing])])
 AC_CHECK_LIB([crypto], [main], [], [AC_MSG_ERROR([libcrypto missing])])
