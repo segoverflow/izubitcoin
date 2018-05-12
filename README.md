@@ -76,7 +76,7 @@ https://github.com/segoverflow/izubitcoin
 
 ### Authors
 
-* **reizu** - http://seguridadoverflow.com
+* **reizu** - https://seguridadoverflow.com
 
 ### License
 
