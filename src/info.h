@@ -7,14 +7,16 @@
 
 #include "connection.h"
 #include "message.h"
+#include "options.h"
 
 class Info {
     public:
-        Info(Connection *connection);
+        Info(Connection *connection, Options *options);
         void run();
 
     protected:
         Connection *connection;
+        Options *options;
         Message *createMsgOut();
 };
 

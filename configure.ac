@@ -1,4 +1,4 @@
-AC_INIT([izubitcoin], [0.1], [reizu@seguridadoverflow.com])
+AC_INIT([izubitcoin], [0.11], [reizu@seguridadoverflow.com])
 
 AC_CONFIG_SRCDIR([src/izubitcoin.cpp])
 
@@ -10,6 +10,8 @@ AC_DEFINE([SEND_MSG_TIMEOUT], [20], [Timeout (seconds) for send a message to a n
 AC_DEFINE([RECV_MSG_TIMEOUT], [20], [Timeout (seconds) for receive a message from a node])
 AC_DEFINE([NODE_VERSION], [70015], [Node version sent])
 AC_DEFINE([USER_AGENT], ["/izubitcoin/"], [User agent sent])
+AC_DEFINE([DEFAULT_CORE], [false], [Use Bitcoin Core protocol instead of Bitcoin Cash])
+AC_DEFINE([DEFAULT_TESTNET], [false], [Use Testnet protocol instead of Mainnet])
 
 AM_INIT_AUTOMAKE([foreign])
 

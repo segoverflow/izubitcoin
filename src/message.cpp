@@ -8,6 +8,7 @@
 
 #include "message.h"
 #include "utils.h"
+#include "options.h"
 #include <openssl/sha.h>
 #include <string.h>
 #include <iostream>
@@ -16,6 +17,14 @@ using namespace std;
 
 Message::Message(Network network) : payloadSize(0), payload(NULL) {
     this->network = network;
+}
+
+Message::Message(Options *options) : payloadSize(0), payload(NULL) {
+    if (options->isCore()) {
+        this->network = options->isTestnet() ? TestnetCore : MainnetCore;
+    } else {
+        this->network = options->isTestnet() ? Testnet : Mainnet;
+    }
 }
 
 uint32_t Message::checksum() {

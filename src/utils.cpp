@@ -9,6 +9,7 @@
 #include "utils.h"
 #include "connection.h"
 #include "info.h"
+#include "options.h"
 #include <iostream>
 #include <string>
 #include <stdlib.h>
@@ -18,17 +19,20 @@
 
 using namespace std;
 
-const string Utils::optstring = "hvp:i";
+const string Utils::optstring = "hvp:ict";
 
 const struct option Utils::long_options[] = {
     { "help", no_argument, 0, 'h' },
     { "version", no_argument, 0, 'v' },
     { "port", required_argument, 0, 'p' },
     { "info", no_argument, 0, 'i' },
+    { "core", no_argument, 0, 'c' },
+    { "testnet", no_argument, 0, 't' },
     { 0, 0, 0, 0 }
 };
 
 void Utils::initApp(int argc, char *argv[]) {
+    Options options;
     string commands;
     int port = DEFAULT_PORT;
     int c;
@@ -56,6 +60,14 @@ void Utils::initApp(int argc, char *argv[]) {
             case 'i':
                 commands += "i";
                 break;
+                
+            case 'c':
+                options.setCore(true);
+                break;
+                
+            case 't':
+                options.setTestnet(true);
+                break;
         }
     }
 
@@ -67,7 +79,7 @@ void Utils::initApp(int argc, char *argv[]) {
         // connection to node
         Connection connection(target, port);
 
-        Utils::runCommands(commands, connection);
+        Utils::runCommands(commands, connection, options);
     }
 }
 
@@ -88,13 +100,16 @@ void Utils::printHelp(void) {
     cout << "\t-v, --version\tshow version and exits" << endl << endl;
 
     cout << "OPTIONS:" << endl;
-    cout << "\t-p <port>, --port <port>\tconnect to this port instead of default " << DEFAULT_PORT << endl << endl;
+    cout << "\t-p <port>, --port <port>\tconnect to this port instead of default " << DEFAULT_PORT << endl;
+    cout << "\t-c, --core\tuse Bitcoin Core (BTC) protocol instead of Bitcoin Cash (BCH)" << endl;
+    cout << "\t-t, --testnet\tuse Testnet protocol instead of Mainnet" << endl << endl;
 
     cout << "TARGET:" << endl;
     cout << "\tIP/hostname of bitcoin node" << endl << endl;
 
     cout << "EXAMPLES:" << endl;
     cout << "\tizubitcoin -i 192.168.1.1" << endl;
+    cout << "\tizubitcoin -i --core 192.168.1.2" << endl;
     cout << "\tizubitcoin --info --port 8334 192.168.1.1" << endl;
 }
 
@@ -103,11 +118,11 @@ void Utils::exitError(string msg) {
     exit(EXIT_FAILURE);
 }
 
-void Utils::runCommands(string commands, Connection &connection) {
+void Utils::runCommands(string commands, Connection &connection, Options &options) {
     for (char c : commands) {
         switch (c) {
             case 'i':
-                Info info(&connection);
+                Info info(&connection, &options);
                 info.run();
                 break;
         }

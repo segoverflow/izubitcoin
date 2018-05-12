@@ -10,14 +10,16 @@
 #include "connection.h"
 #include "message.h"
 #include "utils.h"
+#include "options.h"
 #include "payloads/version.h"
 #include <iostream>
 #include <time.h>
 #include <string.h>
 #include <arpa/inet.h>
 
-Info::Info(Connection *connection) {
+Info::Info(Connection *connection, Options *options) {
     this->connection = connection;
+    this->options = options;
 }
 
 void Info::run() {
@@ -99,7 +101,7 @@ Message *Info::createMsgOut() {
     memcpy(vp + sizeof(vp1) + vp1.user_agent_bytes, &vp2, sizeof(vp2));
     
     // create msg out
-    Message *msgOut = new Message(Main);
+    Message *msgOut = new Message(options);
     msgOut->setCommandName("version");
     msgOut->setPayload((u_char *) vp, sizeof(vp1) + sizeof(vp2) + vp1.user_agent_bytes);
     

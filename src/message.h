@@ -5,13 +5,19 @@
 #ifndef _IZUBITCOIN_MESSAGE_H
 #define _IZUBITCOIN_MESSAGE_H 1
 
+#include "options.h"
 #include <string>
 
 using namespace std;
 
-enum Network {
-    Main = 0xD9B4BEF9,
-    Testnet = 0xDAB5BFFA
+enum Network : uint32_t {
+    // Bitcoin Cash (BCH)
+    Mainnet = 0xE8F3E1E3,
+    Testnet = 0xF4F3E5F4,
+    
+    // Bitcoin Core (BTC)
+    MainnetCore = 0xD9B4BEF9,
+    TestnetCore = 0x0709110B
 };
 
 struct MessageRaw {
@@ -29,6 +35,7 @@ struct MessageHeader {
 class Message {
     public:
         Message(Network network);
+        Message(Options *options);
         string getCommandName();
         size_t getPayloadSize();
         u_char *getPayload();

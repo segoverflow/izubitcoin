@@ -8,6 +8,7 @@
 #include <getopt.h>
 #include <string>
 #include "connection.h"
+#include "options.h"
 
 using namespace std;
 
@@ -22,7 +23,7 @@ class Utils {
 
         static void printVersion(void);
         static void printHelp(void);
-        static void runCommands(string commands, Connection &connection);
+        static void runCommands(string commands, Connection &connection, Options &options);
 };
 
 #endif
