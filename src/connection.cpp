@@ -48,10 +48,10 @@ Connection::Connection(string target, int port) : targetStr(target), targetPort(
             if ((sockfd = socket(aip->ai_family, SOCK_STREAM, IPPROTO_TCP)) == -1) {
                 Utils::exitError("Error creating socket");
             }
-            
+
             // setting non-blocking
             fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFL, NULL) | O_NONBLOCK);
-        
+
             // connecting to node
             if (connect(sockfd, targetSockaddr, aip->ai_addrlen) == -1) {
                 if (errno != EINPROGRESS) {
@@ -65,10 +65,10 @@ Connection::Connection(string target, int port) : targetStr(target), targetPort(
                     FD_SET(sockfd, &wfdset);
                     tv.tv_sec = CONNECTION_TIMEOUT;
                     tv.tv_usec = 0;
-                    
+
                     if (select(sockfd + 1, NULL, &wfdset, NULL, &tv) > 0) {
                         socklen_t len = sizeof error;
-                                                
+
                         // checking socket error
                         getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &error, &len);
 
@@ -99,10 +99,12 @@ void Connection::sendMessage(Message *msg) {
     FD_SET(sockfd, &wfdset);
     tv.tv_sec = SEND_MSG_TIMEOUT;
     tv.tv_usec = 0;
-    
-    if (select(sockfd + 1, NULL, &wfdset, NULL, &tv) > 0) {
-        send(sockfd, msgRaw.content, msgRaw.size, 0);
-    } else {
+
+    // select + send message
+    if (
+        (select(sockfd + 1, NULL, &wfdset, NULL, &tv) <= 0) ||
+        (send(sockfd, msgRaw.content, msgRaw.size, 0) == -1)
+    ) {
         Utils::exitError("Error sending message to node " + targetStr + ":" + to_string(targetPort));
     }
 }
@@ -115,61 +117,76 @@ Message *Connection::recvMessage() {
     FD_SET(sockfd, &rfdset);
     tv.tv_sec = RECV_MSG_TIMEOUT;
     tv.tv_usec = 0;
-    
+
     if (select(sockfd + 1, &rfdset, NULL, NULL, &tv) > 0) {
         struct MessageHeader msgHeader;
         u_char *payload;
         Message *msg;
-        
+
         // header zeroed
         memset(&msgHeader, 0, sizeof(struct MessageHeader));
-        
+
         // receive header
-        recv(sockfd, &msgHeader, sizeof(struct MessageHeader), 0);
+        if (recv(sockfd, &msgHeader, sizeof(struct MessageHeader), 0) == -1) {
+            Utils::exitError("Error receiving message header from node " + targetStr + ":" + to_string(targetPort));
+        }
 
         // instantiate message
         msg = new Message((Network) msgHeader.magic);
         msg->setCommandName(msgHeader.command);
-            
-        // payload
+
+        // if it has payload we receive it
         if (msgHeader.payloadLength) {
             if ((payload = (u_char *) malloc(msgHeader.payloadLength)) == NULL) {
                 Utils::exitError("malloc error");
             }
-            
+
             memset(payload, 0, msgHeader.payloadLength);
-            recv(sockfd, payload, msgHeader.payloadLength, 0);
+
+            FD_ZERO(&rfdset);
+            FD_SET(sockfd, &rfdset);
+            tv.tv_sec = RECV_MSG_TIMEOUT;
+            tv.tv_usec = 0;
+
+            // select + recv payload
+            if (
+                (select(sockfd + 1, &rfdset, NULL, NULL, &tv) <= 0) ||
+                (recv(sockfd, payload, msgHeader.payloadLength, 0) == -1)
+            ) {
+                Utils::exitError("Error receiving message payload from node" + targetStr + ":" + to_string(targetPort));
+            }
+
             msg->setPayload(payload, msgHeader.payloadLength);
         }
-        
+
         return msg;
     } else {
-        Utils::exitError("Error receiving message from node " + targetStr + ":" + to_string(targetPort));
+        Utils::exitError("Error receiving message header from node " + targetStr + ":" + to_string(targetPort));
     }
 }
 
 char *Connection::ipTargetAddr() {
     char *ip = (char *) malloc(16);
-    
+
     if (ip == NULL) {
         Utils::exitError("malloc error");
     }
-    
+
     switch (targetSockaddr->sa_family) {
         case AF_INET: {
             struct sockaddr_in *addr_in = (struct sockaddr_in *) targetSockaddr;
-            
+
             // IPv4 mapped IPv6
             memset(ip, 0x00, 10);
             memset(&ip[10], 0xff, 2);
             memcpy(&ip[12], &addr_in->sin_addr, 4);
-            
+
             return ip;
         }
         case AF_INET6: {
             struct sockaddr_in6 *addr_in6 = (struct sockaddr_in6 *) targetSockaddr;
             memcpy(ip, &addr_in6->sin6_addr, 16);
-                        
+
             return ip;
         }
         default:
@@ -185,20 +202,20 @@ int Connection::getSourcePort() {
     uint8_t buf[64];
     socklen_t saddrSize = sizeof(buf);
     struct sockaddr *saddr = (struct sockaddr *) buf;
-        
+
     if (getsockname(sockfd, saddr, &saddrSize) || (saddrSize > sizeof(buf))) {
         Utils::exitError("Error getting source port (getsockname)");
     }
-    
+
     switch (saddr->sa_family) {
         case AF_INET: {
             struct sockaddr_in *addr_in = (struct sockaddr_in *) saddr;
-                        
+
             return ntohs(addr_in->sin_port);
         }
         case AF_INET6: {
             struct sockaddr_in6 *addr_in6 = (struct sockaddr_in6 *) saddr;
-                        
+
             return ntohs(addr_in6->sin6_port);
         }
         default:
