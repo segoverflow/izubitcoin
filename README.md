@@ -28,7 +28,7 @@ Run without arguments for help:
 ```
 $ izubitcoin
 
-izubitcoin 0.11
+izubitcoin 0.12
 
 usage: izubitcoin <commands>... [options]... <target>
 

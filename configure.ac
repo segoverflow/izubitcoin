@@ -1,4 +1,4 @@
-AC_INIT([izubitcoin], [0.11], [reizu@seguridadoverflow.com])
+AC_INIT([izubitcoin], [0.12], [reizu@seguridadoverflow.com])
 
 AC_CONFIG_SRCDIR([src/izubitcoin.cpp])
 
